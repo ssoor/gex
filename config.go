@@ -10,10 +10,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
 
-	"github.com/izumin5210/gex/pkg/manager"
-	"github.com/izumin5210/gex/pkg/manager/dep"
-	"github.com/izumin5210/gex/pkg/manager/mod"
-	"github.com/izumin5210/gex/pkg/tool"
+	"github.com/ssoor/gex/pkg/manager"
+	"github.com/ssoor/gex/pkg/manager/dep"
+	"github.com/ssoor/gex/pkg/manager/mod"
+	"github.com/ssoor/gex/pkg/tool"
 )
 
 // Config specifies the configration for managing development tools.

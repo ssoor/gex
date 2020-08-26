@@ -5,9 +5,9 @@ import (
 	"go/token"
 	"strconv"
 
-	"github.com/izumin5210/gex/pkg/manager"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
+	"github.com/ssoor/gex/pkg/manager"
 )
 
 // Parser retrieve tool packages from given paths.
@@ -35,7 +35,7 @@ func (p *parserImpl) Parse(path string) (*Manifest, error) {
 	}
 
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, "", string(data), parser.ImportsOnly)
+	f, err := parser.ParseFile(fset, "", string(data), parser.ParseComments)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse %q", path)
 	}
@@ -44,7 +44,11 @@ func (p *parserImpl) Parse(path string) (*Manifest, error) {
 
 	for _, s := range f.Imports {
 		if pkg, err := strconv.Unquote(s.Path.Value); err == nil {
-			tools = append(tools, Tool(pkg))
+			comment := ""
+			if s.Comment != nil {
+				comment = s.Comment.Text()
+			}
+			tools = append(tools, Tool{path: pkg, Global: comment == "Global Tools\n"})
 		}
 	}
 

@@ -2,18 +2,20 @@ package tool
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
 
-	"github.com/izumin5210/gex/pkg/manager"
+	"github.com/ssoor/gex/pkg/manager"
 )
 
 // Repository is an interface for managing and operating tools
 type Repository interface {
 	List(ctx context.Context) ([]Tool, error)
-	Add(ctx context.Context, pkgs ...string) error
+	Add(ctx context.Context, global bool, pkgs ...string) error
 	Build(ctx context.Context, t Tool) (string, error)
 	BuildAll(ctx context.Context) error
 	Run(ctx context.Context, name string, args ...string) error
@@ -49,7 +51,7 @@ func (r *repositoryImpl) List(ctx context.Context) ([]Tool, error) {
 	return m.Tools(), nil
 }
 
-func (r *repositoryImpl) Add(ctx context.Context, pkgs ...string) error {
+func (r *repositoryImpl) Add(ctx context.Context, global bool, pkgs ...string) error {
 	r.Log.Println("add", strings.Join(pkgs, ", "))
 
 	for _, pkg := range pkgs {
@@ -71,7 +73,7 @@ func (r *repositoryImpl) Add(ctx context.Context, pkgs ...string) error {
 
 	for i, pkg := range pkgs {
 		pkg = strings.SplitN(pkg, "@", 2)[0]
-		t := Tool(pkg)
+		t := Tool{path: pkg, Global: global}
 		m.AddTool(t)
 		tools[i] = t
 	}
@@ -98,9 +100,14 @@ func (r *repositoryImpl) Add(ctx context.Context, pkgs ...string) error {
 func (r *repositoryImpl) Build(ctx context.Context, t Tool) (string, error) {
 	binPath := r.BinPath(t.Name())
 
+	if t.Global {
+		binPath = os.ExpandEnv("GOPATH")
+		binPath = filepath.Join(binPath, "bin")
+	}
+
 	if st, err := r.FS.Stat(binPath); err != nil {
 		r.Log.Println("build", t)
-		err := r.manager.Build(ctx, binPath, string(t), r.Verbose)
+		err := r.manager.Build(ctx, binPath, t.String(), r.Verbose)
 		if err != nil {
 			return "", errors.Wrapf(err, "failed to build %s", t)
 		}

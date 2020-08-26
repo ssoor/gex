@@ -5,7 +5,7 @@ package main
 import (
 	"errors"
 
-	"github.com/izumin5210/gex/pkg/tool"
+	"github.com/ssoor/gex/pkg/tool"
 )
 
 func asBuildErrors(err error) *tool.BuildErrors {

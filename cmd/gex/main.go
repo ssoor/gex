@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/izumin5210/gex"
-	"github.com/izumin5210/gex/pkg/tool"
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
+	"github.com/ssoor/gex"
+	"github.com/ssoor/gex/pkg/tool"
 )
 
 const (
@@ -20,6 +20,7 @@ const (
 
 var (
 	pkgsToBeAdded []string
+	flagGlobal    bool
 	flagBuild     bool
 	flagInit      bool
 	flagRegen     bool
@@ -32,6 +33,7 @@ func init() {
 	pflag.SetInterspersed(false)
 	pflag.StringArrayVar(&pkgsToBeAdded, "add", []string{}, "Add new tools")
 	pflag.BoolVar(&flagInit, "init", false, "Initialize tools manifest")
+	pflag.BoolVar(&flagGlobal, "global", false, "Add new tools to \"${GOPATH}/bin\"")
 	pflag.BoolVar(&flagBuild, "build", false, "Build all tools")
 	pflag.BoolVar(&flagRegen, "regen", false, "Regenerate manifest")
 	pflag.BoolVar(&flagVersion, "version", false, "Print the CLI version")
@@ -68,7 +70,7 @@ func run() error {
 
 	switch {
 	case len(pkgsToBeAdded) > 0:
-		err = toolRepo.Add(ctx, pkgsToBeAdded...)
+		err = toolRepo.Add(ctx, flagGlobal, pkgsToBeAdded...)
 	case flagVersion:
 		fmt.Fprintf(os.Stdout, "%s %s\n", cliName, gex.Version)
 	case flagHelp:
@@ -83,7 +85,7 @@ func run() error {
 		}
 		return err
 	case flagInit:
-		err = toolRepo.Add(ctx, "github.com/izumin5210/gex/cmd/gex")
+		err = toolRepo.Add(ctx, true, "github.com/ssoor/gex/cmd/gex")
 	case flagRegen:
 		path := filepath.Join(cfg.RootDir, cfg.ManifestName)
 		m, err := tool.NewParser(cfg.FS, cfg.ManagerType).Parse(path)

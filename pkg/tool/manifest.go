@@ -3,7 +3,7 @@ package tool
 import (
 	"sort"
 
-	"github.com/izumin5210/gex/pkg/manager"
+	"github.com/ssoor/gex/pkg/manager"
 )
 
 // Manifest contains tool list
@@ -37,14 +37,16 @@ func (m *Manifest) FindTool(name string) (t Tool, ok bool) {
 // Tools returns a tool list.
 func (m *Manifest) Tools() []Tool {
 	n := len(m.toolMap)
-	s := make([]string, 0, n)
+	s := make([]Tool, 0, n)
 	for _, t := range m.toolMap {
-		s = append(s, string(t))
+		s = append(s, t)
 	}
-	sort.StringSlice(s).Sort()
+	sort.Slice(s, func(i, j int) bool {
+		return s[i].String() > s[j].String()
+	})
 	ts := make([]Tool, n, n)
 	for i, t := range s {
-		ts[i] = Tool(t)
+		ts[i] = t
 	}
 	return ts
 }
