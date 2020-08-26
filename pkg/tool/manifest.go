@@ -37,17 +37,27 @@ func (m *Manifest) FindTool(name string) (t Tool, ok bool) {
 // Tools returns a tool list.
 func (m *Manifest) Tools() []Tool {
 	n := len(m.toolMap)
-	s := make([]Tool, 0, n)
+	gs := make([]Tool, 0, n)
+	ls := make([]Tool, 0, n)
 	for _, t := range m.toolMap {
-		s = append(s, t)
+		if t.Global {
+			gs = append(gs, t)
+		} else {
+			ls = append(ls, t)
+		}
 	}
-	sort.Slice(s, func(i, j int) bool {
-		return s[i].String() > s[j].String()
+
+	sort.Slice(gs, func(i, j int) bool {
+		return gs[i].String() > gs[j].String()
 	})
-	ts := make([]Tool, n, n)
-	for i, t := range s {
-		ts[i] = t
-	}
+	sort.Slice(ls, func(i, j int) bool {
+		return ls[i].String() > ls[j].String()
+	})
+
+	ts := make([]Tool, 0, n)
+	ts = append(ts, gs...)
+	ts = append(ts, ls...)
+
 	return ts
 }
 

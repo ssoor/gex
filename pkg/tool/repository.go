@@ -101,8 +101,10 @@ func (r *repositoryImpl) Build(ctx context.Context, t Tool) (string, error) {
 	binPath := r.BinPath(t.Name())
 
 	if t.Global {
-		binPath = os.ExpandEnv("GOPATH")
-		binPath = filepath.Join(binPath, "bin")
+		gopath := os.Getenv("GOPATH")
+		if 0 != len(gopath) {
+			binPath = filepath.Join(gopath, "bin", t.Name())
+		}
 	}
 
 	if st, err := r.FS.Stat(binPath); err != nil {
